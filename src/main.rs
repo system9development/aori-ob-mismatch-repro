@@ -8,12 +8,13 @@ use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 async fn main() {
     // let url = "wss://api.aori.io";
     let url = "wss://dev.api.aori.io";
+    let (mut ws, _) = tokio_tungstenite::connect_async(url).await.unwrap();
+
     let weth = address!("82aF49447D8a07e3bd95BD0d56f35241523fBab1");
     let usdc = address!("af88d065e77c8cC2239327C5EDb3A432268e5831");
 
-    let snapshot_request_ask = get_orderbook_side("SELL", 42161, weth, usdc);
-    let snapshot_request_bid = get_orderbook_side("BUY", 42161, weth, usdc);
-    let (mut ws, _) = tokio_tungstenite::connect_async(url).await.unwrap();
+    let snapshot_request_ask = make_request("SELL", 42161, weth, usdc);
+    let snapshot_request_bid = make_request("BUY", 42161, weth, usdc);
 
     let response_bid = send_and_receive(&snapshot_request_bid, &mut ws).await;
     let response_ask = send_and_receive(&snapshot_request_ask, &mut ws).await;
@@ -44,7 +45,7 @@ pub async fn send_and_receive(
     }
 }
 
-pub fn get_orderbook_side(
+pub fn make_request(
     side: &str,
     chain_id: u64,
     base_address: Address,
